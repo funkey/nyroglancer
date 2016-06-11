@@ -1,0 +1,6 @@
+*.sw[pmno]
+*.hdf
+*.h5
+*.pyc
+/build
+/test

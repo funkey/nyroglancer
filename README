@@ -1,0 +1,17 @@
+jupyter extension:
+
+run
+`python setup.py install`
+
+add to `~/.jupyter/profile_default/jupyter_notebook_config.py`
+```
+c = get_config()
+c.NotebookApp.nbserver_extensions = { 'nyroglancer.extension': True }
+```
+
+frontend extension:
+
+run
+`jupyter nbextension install nyroglancer --user [--symlink]`
+(`--symlink` for development)
+`jupyter nbextension enable nyroglancer/main --user`
