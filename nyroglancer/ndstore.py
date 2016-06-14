@@ -133,11 +133,6 @@ class Image(IPythonHandler):
         fake_file = StringIO()
         stack_img.save(fake_file, "jpeg")
 
-        # DEBUG
-        with open("/home/jan/delme/full_file", "w") as f:
-            f.write(binascii.b2a_base64(fake_file.getvalue()).strip())
-            f.close()
-
         return binascii.b2a_base64(fake_file.getvalue()).strip()
 
     def get(self, cf_volume_key, resolution, min_x, max_x, min_y, max_y, min_z, max_z):
