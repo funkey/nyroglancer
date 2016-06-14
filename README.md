@@ -19,9 +19,28 @@ python setup.py install
 ```
 
 Finally, the extension has to be enabled in jupyter. Add to
-`~/.jupyter/profile_default/jupyter_notebook_config.py` the module
+`~/.jupyter/jupyter_notebook_config.py` the module
 `nyroglancer.extension`, e.g.:
 ```python
 c = get_config()
 c.NotebookApp.nbserver_extensions = { 'nyroglancer.extension': True }
+```
+
+Usage
+=====
+
+In your notebook, create a `nyroglancer.Viewer` and populate it with the numpy arrays you'd like to visualize. The following snippet shows how to read numpy arrays from an HDF5 file and show them:
+
+```python
+import nyroglancer
+import numpy as np
+import h5py
+
+raw = h5py.File("test.hdf")['volumes/raw']
+seg = h5py.File("test.hdf")['volumes/labels/neuron_ids']
+
+big_viewer = nyroglancer.Viewer()
+big_viewer.put(raw, resolution=[40,4,4], vtype="raw", name="raw")
+big_viewer.put(seg, resolution=[40,4,4], vtype="segmentation", name="neuron IDs")
+big_viewer.show()
 ```
