@@ -17,7 +17,7 @@ class Viewer(IPythonHandler):
   </head>
   <body>
     <div id="container" style="width:100%;height:1024px;background:black"></div>
-    <script type="text/javascript" src="../js/main.bundle.js"></script>
+    <script type="text/javascript" src="../js/neuroglancer/main.bundle.js"></script>
   </body>
 </html>
         """)
@@ -46,8 +46,8 @@ def load_jupyter_server_extension(nb_server_app):
     web_app.add_handlers(host_pattern, [('/ocp/ca/([^\/]*)/image/jpeg/([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/neariso', ndstore.Image)])
     web_app.add_handlers(host_pattern, [('/ocp/ca/([^\/]*)/segmentation/npz/([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/neariso', ndstore.Segmentation)])
     web_app.add_handlers(host_pattern, [('/viewer', Viewer)])
-    web_app.add_handlers(host_pattern, [('/js/main.bundle.js', MainBundle)])
-    web_app.add_handlers(host_pattern, [('/js/chunk.worker.bundle.js', ChunkWorkerBundle)])
+    web_app.add_handlers(host_pattern, [('/js/neuroglancer/main.bundle.js', MainBundle)])
+    web_app.add_handlers(host_pattern, [('/js/neuroglancer/chunk.worker.bundle.js', ChunkWorkerBundle)])
     web_app.add_handlers(host_pattern, [('/css/neuroglancer.css', NeuroglancerCss)])
 
     print "nyroglancer extension loaded"
