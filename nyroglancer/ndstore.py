@@ -1,8 +1,9 @@
 from .intrusion import evaluate
-from PIL import Image
+from PIL import Image as PilImage
 from StringIO import StringIO
 from notebook.base.handlers import IPythonHandler
 from tornado.escape import url_unescape
+import binascii
 import json
 import math
 import numpy as np
@@ -29,14 +30,12 @@ class Info(IPythonHandler):
         cf = url_unescape(cf_volume_key[:-LEN_VOLUME_KEY])
         volume_key = cf_volume_key[-LEN_VOLUME_KEY:]
 
-        print "assembling info for volume " + volume_key
-
-        volume_type = evaluate(cf, "nyroglancer.volumes['%s'].vtype" % volume_key)
+        volume_type = json.loads(evaluate(cf, "nyroglancer.volumes['%s'].vtype" % volume_key))
         is_segmentation = (volume_type == "segmentation")
 
-        volume_size = json.loads(evaluate(cf, "list(nyroglancer.volumes['%s'].data.shape)" % volume_key))
-        resolution = json.loads(evaluate(cf, "nyroglancer.volumes['%s'].resolution" % volume_key))
-        chunk_size = json.loads(evaluate(cf, "nyroglancer.volumes['%s'].chunk_size" % volume_key))
+        volume_size = json.loads(evaluate(cf, "list(nyroglancer.volumes['%s'].data.shape)" % volume_key))[::-1]
+        resolution = json.loads(evaluate(cf, "nyroglancer.volumes['%s'].resolution" % volume_key))[::-1]
+        chunk_size = json.loads(evaluate(cf, "nyroglancer.volumes['%s'].chunk_size" % volume_key))[::-1]
         num_chunks = np.prod([ int(math.ceil(volume_size[d]/chunk_size[d])) for d in range(3) ])
 
         if is_segmentation:
@@ -66,7 +65,7 @@ class Info(IPythonHandler):
                 }
             }
 
-        self.finish(json.dumps({
+        self.write(json.dumps({
             "channels": channel_info,
             "dataset": {
                 "cube_dimension": {
@@ -108,3 +107,102 @@ class Info(IPythonHandler):
                 "version": "0.0"
             }
         }))
+        self.set_header("Content-Type", "application/json")
+
+class Image(IPythonHandler):
+
+    @staticmethod
+    def backend(volume, min_x, max_x, min_y, max_y, min_z, max_z):
+        """This function will be called in the kernel that started the viewer.
+        """
+
+        (chunk_min, chunk_max, chunk_size) = parse_dimensions(min_x, max_x, min_y, max_y, min_z, max_z)
+
+        chunk = volume.data[
+            chunk_min[2]:chunk_max[2],
+            chunk_min[1]:chunk_max[1],
+            chunk_min[0]:chunk_max[0],
+        ]
+
+        chunk_stack = np.zeros((chunk_size[1]*chunk_size[2], chunk_size[0]), dtype=np.uint8)
+        for z in range(chunk_size[2]):
+            chunk_stack[z*chunk_size[1]:(z+1)*chunk_size[1],:] = chunk[z,:,:]
+
+        stack_img = PilImage.fromarray(chunk_stack)
+
+        fake_file = StringIO()
+        stack_img.save(fake_file, "jpeg")
+
+        # DEBUG
+        with open("/home/jan/delme/full_file", "w") as f:
+            f.write(binascii.b2a_base64(fake_file.getvalue()).strip())
+            f.close()
+
+        return binascii.b2a_base64(fake_file.getvalue()).strip()
+
+    def get(self, cf_volume_key, resolution, min_x, max_x, min_y, max_y, min_z, max_z):
+
+        cf = url_unescape(cf_volume_key[:-LEN_VOLUME_KEY])
+        volume_key = cf_volume_key[-LEN_VOLUME_KEY:]
+
+        data = evaluate(cf, "nyroglancer.ndstore.Image.backend(nyroglancer.volumes['%s'], %s, %s, %s, %s, %s, %s)" % (volume_key, min_x, max_x, min_y, max_y, min_z, max_z))
+        jpg = binascii.a2b_base64(data)
+        self.write(jpg)
+        self.set_header("Content-Type", "image/jpeg")
+
+class Segmentation(IPythonHandler):
+
+    @staticmethod
+    def backend(volume, min_x, max_x, min_y, max_y, min_z, max_z):
+        """This function will be called in the kernel that started the viewer.
+        """
+
+        (chunk_min, chunk_max, chunk_size) = parse_dimensions(min_x, max_x, min_y, max_y, min_z, max_z)
+
+        # FIXME: neuroglancer does not support uint64 (at the moment), therefore we
+        # ship uint32 for now
+        chunk = volume.data[
+            chunk_min[2]:chunk_max[2],
+            chunk_min[1]:chunk_max[1],
+            chunk_min[0]:chunk_max[0],
+        ].astype(np.uint32)
+
+        fake_file = StringIO()
+        np.save(fake_file, chunk[None,:])
+
+        return binascii.b2a_base64(zlib.compress(fake_file.getvalue())).strip()
+
+    def get(self, cf_volume_key, resolution, min_x, max_x, min_y, max_y, min_z, max_z):
+
+        cf = url_unescape(cf_volume_key[:-LEN_VOLUME_KEY])
+        volume_key = cf_volume_key[-LEN_VOLUME_KEY:]
+
+        pyz = binascii.a2b_base64(evaluate(cf, "nyroglancer.ndstore.Segmentation.backend(nyroglancer.volumes['%s'], %s, %s, %s, %s, %s, %s)" % (volume_key, min_x, max_x, min_y, max_y, min_z, max_z)))
+        self.write(pyz)
+        self.set_header("Content-Type", "application/octet-stream")
+
+def parse_dimensions(min_x, max_x, min_y, max_y, min_z, max_z):
+
+    min_x = int(min_x)
+    max_x = int(max_x)
+    min_y = int(min_y)
+    max_y = int(max_y)
+    min_z = int(min_z)
+    max_z = int(max_z)
+
+    return (
+        [ min_x, min_y, min_z ],
+        [ max_x, max_y, max_z ],
+        [
+            get_pos_diff(min_x, max_x),
+            get_pos_diff(min_y, max_y),
+            get_pos_diff(min_z, max_z)
+        ],
+    )
+
+def get_pos_diff(start, end):
+
+    d = end - start
+    if d < 0:
+        raise RuntimeError("invalid dimensions: %i, %i" % (start, end))
+    return d

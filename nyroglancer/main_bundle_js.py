@@ -10314,6 +10314,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var disposable_1 = __webpack_require__(8);
 function getShader(gl, source, shaderType) {
     var shader = gl.createShader(shaderType);
+    console.log(source);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
