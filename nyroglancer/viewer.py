@@ -31,7 +31,7 @@ class Viewer:
         """
         self.hostname = hostname
 
-    def put(self, array, resolution = [1.0, 1.0, 1.0], vtype="raw", chunk_size = [ 100, 100, 100 ], name = None):
+    def put(self, array, resolution = [1.0, 1.0, 1.0], vtype="raw", chunk_size = None, name = None):
         """
         Prepare a numpy array for visualization.
 
@@ -53,6 +53,16 @@ class Viewer:
         """
 
         key = ndstore.create_key()
+
+        if chunk_size is None:
+            # guess a chunk size, such that the max dimension of the chunk is
+            # 512px
+            min_res = min(resolution)
+            chunk_size = [
+                max(64,int(512*min_res/resolution[0])),
+                max(64,int(512*min_res/resolution[1])),
+                max(64,int(512*min_res/resolution[2])),
+            ]
 
         if name is None:
             name = key
