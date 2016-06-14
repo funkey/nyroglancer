@@ -3,9 +3,6 @@ from jupyter_client import find_connection_file
 from tornado.escape import url_escape
 import ndstore
 
-# TODO: get from web server
-hostname = 'localhost:8888'
-
 # volumes of all viewer instances
 volumes = {}
 
@@ -25,6 +22,14 @@ class Viewer:
 
         self.volumes = {}
         self.setup_ndstore_url()
+        self.hostname = 'localhost:8888'
+
+    def set_hostname(self, hostname):
+        """Set the name of the server running the Jupyter Notebook.
+
+        Defaults to "localhost:8888". Change this if you use a remote server.
+        """
+        self.hostname = hostname
 
     def put(self, array, resolution = [1.0, 1.0, 1.0], vtype="raw", chunk_size = [ 100, 100, 100 ], name = None):
         """
@@ -68,12 +73,12 @@ class Viewer:
 
             layers[volume.name] = {
                 'type': 'image' if volume.vtype is 'raw' else 'segmentation',
-                'source': 'ndstore://http://' + hostname + '/' + self.kernel_esc_path + key
+                'source': 'ndstore://http://' + self.hostname + '/' + self.kernel_esc_path + key
             }
 
         layers_url = str(layers).replace(' ', '').replace(',', '_')
 
-        viewer_url = "http://" + hostname + '/viewer#!{\'layers\':' + layers_url + '_\'navigation\':{\'pose\':{\'position\':{\'voxelSize\':[1_1_1]_\'voxelCoordinates\':[50_50_50]}}_\'zoomFactor\':1}_\'perspectiveZoom\':1}'
+        viewer_url = "http://" + self.hostname + '/viewer#!{\'layers\':' + layers_url + '_\'navigation\':{\'pose\':{\'position\':{\'voxelSize\':[1_1_1]_\'voxelCoordinates\':[50_50_50]}}_\'zoomFactor\':1}_\'perspectiveZoom\':1}'
 
         return HTML("<iframe src=\"" + viewer_url + "\" width=\"100%\" height=\"1024px\"><\iframe>")
 

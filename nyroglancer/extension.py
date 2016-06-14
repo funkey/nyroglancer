@@ -42,7 +42,6 @@ def load_jupyter_server_extension(nb_server_app):
     web_app = nb_server_app.web_app
     host_pattern = '.*$'
 
-    #web_app.add_handlers(host_pattern, [('/ocp/ca/(.*)/public_tokens', ndstore.PublicTokens)])
     web_app.add_handlers(host_pattern, [('/ocp/ca/([^\/]*)/info', ndstore.Info)])
     web_app.add_handlers(host_pattern, [('/ocp/ca/([^\/]*)/image/jpeg/([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/neariso', ndstore.Image)])
     web_app.add_handlers(host_pattern, [('/ocp/ca/([^\/]*)/segmentation/npz/([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/neariso', ndstore.Segmentation)])
@@ -51,4 +50,4 @@ def load_jupyter_server_extension(nb_server_app):
     web_app.add_handlers(host_pattern, [('/js/chunk.worker.bundle.js', ChunkWorkerBundle)])
     web_app.add_handlers(host_pattern, [('/css/neuroglancer.css', NeuroglancerCss)])
 
-    print "nyroglancer loaded! (registered tokens, info, and viewer)"
+    print "nyroglancer extension loaded"

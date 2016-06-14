@@ -16,13 +16,6 @@ def create_key():
 
     return ''.join([random.SystemRandom().choice('abcdefghijklmnopqrstuvwxyz0123456789') for i in range(LEN_VOLUME_KEY)])
 
-#class PublicTokens(IPythonHandler):
-
-    #def get(self, cf):
-
-        #res = evaluate(cf, "nyroglancer.volumes.keys()")
-        #self.finish(res)
-
 class Info(IPythonHandler):
 
     def get(self, cf_volume_key):
