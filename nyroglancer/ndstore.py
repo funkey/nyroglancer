@@ -62,7 +62,7 @@ class Info(IPythonHandler):
             "channels": channel_info,
             "dataset": {
                 "cube_dimension": {
-                    str(i): chunk_size for i in range(num_chunks)
+                    "0": chunk_size
                 },
                 "description": "volume " + volume_key,
                 "neariso_imagesize": {
