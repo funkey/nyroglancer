@@ -20,7 +20,7 @@ class Viewer:
 
     def __init__(self):
 
-        self.volumes = {}
+        self.volumes = []
         self.setup_ndstore_url()
         self.hostname = 'localhost:8888'
 
@@ -68,7 +68,7 @@ class Viewer:
             name = key
 
         volume = Volume(array, resolution, vtype, chunk_size, name)
-        self.volumes[key] = volume
+        self.volumes.append((key, volume))
 
         global volumes
         volumes[key] = volume
@@ -79,7 +79,7 @@ class Viewer:
 
         layers = {}
         num = 0
-        for (key, volume) in self.volumes.iteritems():
+        for (key, volume) in self.volumes:
 
             layers[volume.name] = {
                 'type': 'image' if volume.vtype is 'raw' else 'segmentation',
