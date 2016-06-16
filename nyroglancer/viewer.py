@@ -85,16 +85,18 @@ class Viewer:
 
     def show(self):
 
-        layers = {}
-        num = 0
+        layers_url = "{"
+        first = True
         for (key, volume) in self.volumes:
 
-            layers[volume.name] = {
+            if not first:
+                layers_url += "_"
+            first = False
+            layers_url += "'" + volume.name + "':" + str({
                 'type': 'image' if volume.vtype is 'raw' else 'segmentation',
                 'source': 'ndstore://http://' + self.hostname + '/' + self.kernel_esc_path + key
-            }
-
-        layers_url = str(layers).replace(' ', '').replace(',', '_')
+            }).replace(' ', '').replace(',', '_')
+        layers_url += "}"
 
         viewer_url = "http://" + self.hostname + '/viewer#!{\'layers\':' + layers_url + '_\'navigation\':{\'pose\':{\'position\':{\'voxelSize\':[1_1_1]_\'voxelCoordinates\':[50_50_50]}}_\'zoomFactor\':1}_\'perspectiveZoom\':1}'
 
