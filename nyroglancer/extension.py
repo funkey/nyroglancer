@@ -2,7 +2,7 @@ from notebook.base.handlers import IPythonHandler
 import chunk_worker_bundle_js
 import main_bundle_js
 import ndstore
-import neuroglancer_css
+import styles_css
 
 class Viewer(IPythonHandler):
 
@@ -13,7 +13,7 @@ class Viewer(IPythonHandler):
   <head>
     <meta charset="UTF-8">
     <title>neuroglancer</title>
-    <link rel="stylesheet" type="text/css" href="../css/neuroglancer.css" />
+    <link rel="stylesheet" type="text/css" href="../css/neuroglancer/styles.css" />
   </head>
   <body>
     <div id="container" style="width:100%;height:1024px;background:black"></div>
@@ -32,9 +32,9 @@ class ChunkWorkerBundle(IPythonHandler):
         self.write(chunk_worker_bundle_js.content)
         self.set_header("Content-Type", "application/javascript")
 
-class NeuroglancerCss(IPythonHandler):
+class StylesCss(IPythonHandler):
     def get(self):
-        self.write(neuroglancer_css.content)
+        self.write(styles_css.content)
         self.set_header("Content-Type", "text/css")
 
 def load_jupyter_server_extension(nb_server_app):
@@ -48,6 +48,6 @@ def load_jupyter_server_extension(nb_server_app):
     web_app.add_handlers(host_pattern, [('/viewer', Viewer)])
     web_app.add_handlers(host_pattern, [('/js/neuroglancer/main.bundle.js', MainBundle)])
     web_app.add_handlers(host_pattern, [('/js/neuroglancer/chunk.worker.bundle.js', ChunkWorkerBundle)])
-    web_app.add_handlers(host_pattern, [('/css/neuroglancer.css', NeuroglancerCss)])
+    web_app.add_handlers(host_pattern, [('/css/neuroglancer/styles.css', StylesCss)])
 
     print "nyroglancer extension loaded"
