@@ -100,8 +100,6 @@ class Viewer:
         arguments_json = json.dumps(arguments)
         viewer_url = "http://" + self.hostname + '/viewer#!' + urllib.quote(arguments_json, safe='~@#$&()*!+=:;,.?/\'')
 
-        print viewer_url
-
         return HTML("<iframe src=\"" + viewer_url + "\" width=\"100%\" height=\"1024px\"><\iframe>")
 
     def create_info_url(volume_key):
