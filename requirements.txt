@@ -1,3 +1,4 @@
 jupyter
 numpy
 Pillow
+git://github.com/funkey/neuroglancer@81c219d0201ea4d0f41b40b74b6a2e4013bbc6bf#egg=neuroglancer
