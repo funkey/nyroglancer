@@ -1,7 +1,10 @@
 from IPython.display import HTML
 from jupyter_client import find_connection_file
 from tornado.escape import url_escape
+import collections
+import json
 import ndstore
+import urllib
 
 # volumes of all viewer instances
 volumes = {}
@@ -85,20 +88,19 @@ class Viewer:
 
     def show(self):
 
-        layers_url = "{"
-        first = True
+        layers = collections.OrderedDict()
         for (key, volume) in self.volumes:
 
-            if not first:
-                layers_url += "_"
-            first = False
-            layers_url += "'" + volume.name + "':" + str({
+            layers[volume.name] = {
                 'type': 'image' if volume.vtype is 'raw' else 'segmentation',
                 'source': 'ndstore://http://' + self.hostname + '/' + self.kernel_esc_path + key
-            }).replace(' ', '').replace(',', '_')
-        layers_url += "}"
+            }
 
-        viewer_url = "http://" + self.hostname + '/viewer#!{\'layers\':' + layers_url + '_\'navigation\':{\'pose\':{\'position\':{\'voxelSize\':[1_1_1]_\'voxelCoordinates\':[50_50_50]}}_\'zoomFactor\':1}_\'perspectiveZoom\':1}'
+        arguments = { 'layers': layers }
+        arguments_json = json.dumps(arguments)
+        viewer_url = "http://" + self.hostname + '/viewer#!' + urllib.quote(arguments_json, safe='~@#$&()*!+=:;,.?/\'')
+
+        print viewer_url
 
         return HTML("<iframe src=\"" + viewer_url + "\" width=\"100%\" height=\"1024px\"><\iframe>")
 
