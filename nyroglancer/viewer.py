@@ -55,14 +55,22 @@ class Viewer:
         key = ndstore.create_key()
 
         if chunk_size is None:
-            # guess a chunk size, such that the max dimension of the chunk is
-            # 512px
-            min_res = min(resolution)
-            chunk_size = [
-                max(64,int(512*min_res/resolution[0])),
-                max(64,int(512*min_res/resolution[1])),
-                max(64,int(512*min_res/resolution[2])),
-            ]
+
+            # guess a chunk size, such that the max size of the chunk is
+            # 2**21 = 2**(3*7)
+            #
+            # in isotropic volumes, this is [2**7, 2**7, 2**7]
+            #
+            # in unisotropic volumes, we redistribute the exponent according to 
+            # the resolution
+
+            # voxels per world unit
+            vpu = [ 1.0/r for r in resolution ]
+            sum_vpu = sum(vpu)
+            b0 = int((float(vpu[0])/sum_vpu)*21)
+            b1 = int((float(vpu[1])/sum_vpu)*21)
+            b2 = int((float(vpu[2])/sum_vpu)*21)
+            chunk_size = [ 2**b0, 2**b1, 2**b2 ]
 
         if name is None:
             name = key
@@ -77,16 +85,18 @@ class Viewer:
 
     def show(self):
 
-        layers = {}
-        num = 0
+        layers_url = "{"
+        first = True
         for (key, volume) in self.volumes:
 
-            layers[volume.name] = {
+            if not first:
+                layers_url += "_"
+            first = False
+            layers_url += "'" + volume.name + "':" + str({
                 'type': 'image' if volume.vtype is 'raw' else 'segmentation',
                 'source': 'ndstore://http://' + self.hostname + '/' + self.kernel_esc_path + key
-            }
-
-        layers_url = str(layers).replace(' ', '').replace(',', '_')
+            }).replace(' ', '').replace(',', '_')
+        layers_url += "}"
 
         viewer_url = "http://" + self.hostname + '/viewer#!{\'layers\':' + layers_url + '_\'navigation\':{\'pose\':{\'position\':{\'voxelSize\':[1_1_1]_\'voxelCoordinates\':[50_50_50]}}_\'zoomFactor\':1}_\'perspectiveZoom\':1}'
 
