@@ -1,7 +1,5 @@
 from notebook.base.handlers import IPythonHandler
 from neuroglancer.static import *
-import chunk_worker_bundle_js
-import main_bundle_js
 import ndstore
 
 class Viewer(IPythonHandler):
