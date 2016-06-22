@@ -26,6 +26,14 @@ class Viewer:
         self.volumes = []
         self.setup_ndstore_url()
         self.hostname = 'localhost:8888'
+        self.large = False
+
+    def set_large(self, large = True):
+        """Let the viewer span the whole width of the browser window.
+
+        This will resize your IPython column to the same width.
+        """
+        self.large = large
 
     def set_hostname(self, hostname):
         """Set the name of the server running the Jupyter Notebook.
@@ -100,7 +108,8 @@ class Viewer:
         arguments_json = json.dumps(arguments)
         viewer_url = "http://" + self.hostname + '/viewer#!' + urllib.quote(arguments_json, safe='~@#$&()*!+=:;,.?/\'')
 
-        return HTML("<iframe src=\"" + viewer_url + "\" width=\"100%\" height=\"1024px\"><\iframe>")
+        large_html = "<style>.container { width:100% !important; }</style>" if self.large else ""
+        return HTML(large_html + "<iframe src=\"" + viewer_url + "\" width=\"100%\" height=\"1024px\"><\iframe>")
 
     def create_info_url(volume_key):
 
