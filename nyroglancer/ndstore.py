@@ -28,6 +28,7 @@ class Info(IPythonHandler):
 
         volume_size = json.loads(evaluate(cf, "list(nyroglancer.volumes['%s'].data.shape)" % volume_key))[::-1]
         resolution = json.loads(evaluate(cf, "nyroglancer.volumes['%s'].resolution" % volume_key))[::-1]
+        offset = json.loads(evaluate(cf, "nyroglancer.volumes['%s'].offset" % volume_key))[::-1]
         chunk_size = json.loads(evaluate(cf, "nyroglancer.volumes['%s'].chunk_size" % volume_key))[::-1]
         num_chunks = np.prod([ int(math.ceil(volume_size[d]/chunk_size[d])) for d in range(3) ])
 
@@ -81,7 +82,7 @@ class Info(IPythonHandler):
                     "0": volume_size
                 },
                 "offset": {
-                    "0": [ 0, 0, 0 ]
+                    "0": offset
                 },
                 "voxelres": {
                     "0": resolution

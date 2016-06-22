@@ -11,13 +11,15 @@ volumes = {}
 
 class Volume:
 
-    def __init__(self, data, resolution, vtype, chunk_size, name):
+    def __init__(self, data, resolution, offset, vtype, chunk_size, name, shader):
 
         self.data = data
         self.resolution = resolution
+        self.offset = offset
         self.vtype = vtype
         self.chunk_size = chunk_size
         self.name = name
+        self.shader = shader
 
 class Viewer:
 
@@ -42,7 +44,7 @@ class Viewer:
         """
         self.hostname = hostname
 
-    def put(self, array, resolution = [1.0, 1.0, 1.0], vtype="raw", chunk_size = None, name = None):
+    def put(self, array, resolution = [1.0, 1.0, 1.0], offset = [0, 0, 0], vtype="raw", chunk_size = None, name = None, shader = None):
         """
         Prepare a numpy array for visualization.
 
@@ -52,10 +54,18 @@ class Viewer:
             The data to show.
         resolution: [float], optional
             The resolution of the data.
+        offset: [float], optional
+            The offset of the volume in world units.
         vtype: string, optional
             "raw" or "segmentation"
+        chunk_size: [float], optional
+            The chunk size to be used by neuroglancer to load parts of the volume.
         name: string, optional
             A human readable name for the volume. Will be shown as the layer name in the viewer.
+        shader: string, optional
+            A GLSL shader used to render the volume. See 
+            https://github.com/google/neuroglancer/blob/master/src/neuroglancer/sliceview/image_layer_rendering.md 
+            for details.
         """
 
         key = ndstore.create_key()
@@ -81,7 +91,7 @@ class Viewer:
         if name is None:
             name = key
 
-        volume = Volume(array, resolution, vtype, chunk_size, name)
+        volume = Volume(array, resolution, offset, vtype, chunk_size, name, shader)
         self.volumes.append((key, volume))
 
         global volumes
@@ -96,6 +106,9 @@ class Viewer:
                 'type': 'image' if volume.vtype is 'raw' else 'segmentation',
                 'source': 'ndstore://http://' + self.hostname + '/' + self.kernel_esc_path + key
             }
+
+            if volume.shader is not None:
+                layers[volume.name]['shader'] = volume.shader
 
         arguments = { 'layers': layers }
         arguments_json = json.dumps(arguments)
