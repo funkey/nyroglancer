@@ -65,6 +65,10 @@ class Info(IPythonHandler):
                 "cube_dimension": {
                     "0": chunk_size
                 },
+                # for neuroglancer
+                "chunk_size": {
+                    "0": chunk_size
+                },
                 "description": "volume " + volume_key,
                 "neariso_imagesize": {
                     "0": volume_size
