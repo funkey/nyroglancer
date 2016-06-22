@@ -56,11 +56,6 @@ class Viewer:
             "raw" or "segmentation"
         name: string, optional
             A human readable name for the volume. Will be shown as the layer name in the viewer.
-
-        Returns
-        -------
-        key:string
-            An identifier for the volume, to be used with `show`.
         """
 
         key = ndstore.create_key()
@@ -92,8 +87,6 @@ class Viewer:
         global volumes
         volumes[key] = volume
 
-        return key
-
     def show(self):
 
         layers = collections.OrderedDict()
@@ -110,11 +103,6 @@ class Viewer:
 
         large_html = "<style>.container { width:100% !important; }</style>" if self.large else ""
         return HTML(large_html + "<iframe src=\"" + viewer_url + "\" width=\"100%\" height=\"1024px\"><\iframe>")
-
-    def create_info_url(volume_key):
-
-        #<a href=\"" + ndstore_url + "/public_tokens/\">public_tokens</a>
-        return HTML("<a href=\"../ocp/ca/" + self.kernel_esc_path + volume_key + "/info/\">info</a>")
 
     def setup_ndstore_url(self):
 
