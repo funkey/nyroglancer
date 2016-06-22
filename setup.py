@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
     name='nyroglancer',
-    version='0.1',
+    version='0.0.1',
     description='jupyter extension for neuroglancer',
     author='Jan Funke',
     author_email='jfunke@iri.upc.edu',
-    packages=['nyroglancer'],
+    url='https://github.com/funkey/nyroglancer',
+    license = 'Apache License 2.0',
+    packages = find_packages(),
+    install_requires = [
+        "Pillow>=3.2.0",
+        "jupyter",
+        "numpy",
+        "neuroglancer>=0.0.5",
+    ],
+    use_2to3 = True,
 )
