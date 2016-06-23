@@ -36,9 +36,7 @@ class Info(IPythonHandler):
             channel_info = {
                 "segmentation": {
                     "channel_type": "annotation",
-                    # FIXME: neuroglancer does not support uint64 (at the moment),
-                    # therefore we ship uint32 for now
-                    "datatype": "uint32",
+                    "datatype": "uint64",
                     "exceptions": 0,
                     "propagate": 2,
                     "readonly": 1,
@@ -148,13 +146,11 @@ class Segmentation(IPythonHandler):
 
         (chunk_min, chunk_max, chunk_size) = parse_dimensions(min_x, max_x, min_y, max_y, min_z, max_z)
 
-        # FIXME: neuroglancer does not support uint64 (at the moment), therefore we
-        # ship uint32 for now
         chunk = volume.data[
             chunk_min[2]:chunk_max[2],
             chunk_min[1]:chunk_max[1],
             chunk_min[0]:chunk_max[0],
-        ].astype(np.uint32)
+        ].astype(np.uint64)
 
         fake_file = StringIO()
         np.save(fake_file, chunk[None,:])
