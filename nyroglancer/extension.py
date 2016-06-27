@@ -40,10 +40,10 @@ def load_jupyter_server_extension(nb_server_app):
     web_app = nb_server_app.web_app
     host_pattern = '.*$'
 
-    web_app.add_handlers(host_pattern, [('/ocp/ca/([^\/]*)/info', ndstore.Info)])
-    web_app.add_handlers(host_pattern, [('/ocp/ca/([^\/]*)/image/jpeg/([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/neariso', ndstore.Image)])
-    web_app.add_handlers(host_pattern, [('/ocp/ca/([^\/]*)/segmentation/npz/([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/neariso', ndstore.Segmentation)])
-    web_app.add_handlers(host_pattern, [('/viewer', Viewer)])
+    web_app.add_handlers(host_pattern, [('/neuroglancer/info/([^/]+)', ndstore.Info)])
+    web_app.add_handlers(host_pattern, [('/neuroglancer/([^/]+)/([^/]+)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)', ndstore.Data)])
+    web_app.add_handlers(host_pattern, [('/neuroglancer', Viewer)])
+    web_app.add_handlers(host_pattern, [('/register_token/([^/]+)/([^/]+)', ndstore.RegisterToken)])
     web_app.add_handlers(host_pattern, [('/js/neuroglancer/main.bundle.js', MainBundle)])
     web_app.add_handlers(host_pattern, [('/js/neuroglancer/chunk.worker.bundle.js', ChunkWorkerBundle)])
     web_app.add_handlers(host_pattern, [('/css/neuroglancer/styles.css', StylesCss)])

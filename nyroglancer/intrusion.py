@@ -1,53 +1,61 @@
-from IPython.lib.kernel import find_connection_file
 from jupyter_client import BlockingKernelClient
 
 clients = {}
 
-def get_kernel_client(connection_file):
+def connect(connection_file):
 
     if connection_file not in clients:
 
         print "[nyroglancer] connecting to: " + connection_file
 
-        km = BlockingKernelClient(connection_file=connection_file)
-        km.load_connection_file()
-        km.start_channels()
-        clients[connection_file] = km
+        kernel_client = BlockingKernelClient(connection_file=connection_file)
+        kernel_client.load_connection_file()
+        kernel_client.start_channels()
+        clients[connection_file] = kernel_client
 
-        return km
+        return kernel_client
 
-    #print "[nyroglancer] reusing existing client to " + connection_file
     return clients[connection_file]
 
-def evaluate(connection_file, expression):
+def evaluate(kernel_client, expression):
+    """Evaluate `expression` in an IPython kernel.
 
-        km = get_kernel_client(connection_file)
+    Parameters
+    ----------
 
-        #print "[nyroglancer] evaluating expression " + expression
-        msg_id = km.execute("import nyroglancer;", user_expressions = {'e':expression})
+    kernel_client:BlockingKernelClient
+        Client to the kernel to evaluate `expression`.
+    expression:string
+        The expression to evaluate.
 
-        reply = None
-        for i in range(5):
-            #print "[nyroglancer] getting reply..."
-            reply = km.get_shell_msg()
-            #print "[nyroglancer] " + str(reply)
-            if 'content' in reply and 'user_expressions' in reply['content']:
-                #print "[nyroglancer] seems like the right one"
-                break
+    Returns
+    -------
 
-        if reply is None:
-            raise RuntimeError("could not get reply for execute request")
+    string
+        A json dump of the evaluated expression.
+    """
 
-        result = reply['content']['user_expressions']['e']
+    setup = "import nyroglancer; import json;"
+    expression = "json.dumps(%s)" % expression
 
-        if isinstance(result, dict) and 'status' in result and result['status'] == 'error':
-            raise RuntimeError(result['evalue'] + "\n\n" + "\n\t".join(result['traceback']))
+    msg_id = kernel_client.execute(setup, user_expressions = {'e':expression})
 
-        #print "[nyroglancer] result is " + str(result)
+    reply = None
+    for i in range(5):
+        reply = kernel_client.get_shell_msg()
+        if 'content' in reply and 'user_expressions' in reply['content']:
+            break
 
-        data = result['data'].values()[0].strip()
-        #print "[nyroglancer] return data part " + str(data)
+    if reply is None:
+        raise RuntimeError("could not get reply for execute request %s" % expression)
 
-        # to json decode strings on the caller side, we need to replace
-        #  ' -> "
-        return data.replace("'", '"')
+    result = reply['content']['user_expressions']['e']
+
+    if isinstance(result, dict) and 'status' in result and result['status'] == 'error':
+        raise RuntimeError(result['evalue'] + "\n\n" + "\n\t".join(result['traceback']))
+
+    data = result['data'].values()[0].strip().strip('\'').decode('string-escape')
+
+    #print "[nyroglancer] return data part (between >>> and <<<):\n\t>>>" + str(data) + "<<<\n"
+
+    return data

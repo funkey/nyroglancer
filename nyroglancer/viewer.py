@@ -1,34 +1,25 @@
 from IPython.display import HTML
 from jupyter_client import find_connection_file
 from tornado.escape import url_escape
+from tornado.httpclient import HTTPClient
 import collections
+import intrusion
 import json
 import ndstore
+import neuroglancer
 import urllib
 
 # volumes of all viewer instances
 volumes = {}
 
-class Volume:
-
-    def __init__(self, data, resolution, offset, vtype, chunk_size, name, shader):
-
-        self.data = data
-        self.resolution = resolution
-        self.offset = offset
-        self.vtype = vtype
-        self.chunk_size = chunk_size
-        self.name = name
-        self.shader = shader
-
-class Viewer:
+class Viewer(neuroglancer.BaseViewer):
 
     def __init__(self):
 
-        self.volumes = []
-        self.setup_ndstore_url()
+        self.layers = collections.OrderedDict()
         self.hostname = 'localhost:8888'
         self.large = False
+        super(Viewer, self).__init__()
 
     def set_large(self, large = True):
         """Let the viewer span the whole width of the browser window.
@@ -44,7 +35,7 @@ class Viewer:
         """
         self.hostname = hostname
 
-    def put(self, array, resolution = [1.0, 1.0, 1.0], offset = [0, 0, 0], vtype="raw", chunk_size = None, name = None, shader = None):
+    def put(self, array, voxel_size = [1.0, 1.0, 1.0], offset = [0, 0, 0], volume_type = None, chunk_data_sizes = None, name = None, shader = None, visible = True):
         """
         Prepare a numpy array for visualization.
 
@@ -52,25 +43,28 @@ class Viewer:
         ----------
         array: numpy.array
             The data to show.
-        resolution: [float], optional
+        voxel_size: [float], optional
             The resolution of the data.
         offset: [float], optional
             The offset of the volume in world units.
-        vtype: string, optional
-            "raw" or "segmentation"
-        chunk_size: [float], optional
-            The chunk size to be used by neuroglancer to load parts of the volume.
+        volume_type: string, optional
+            "image" or "segmentation". If not set, it will be guessed based on the data type of `array`.
+        chunk_data_sizes: [ [float] ], optional
+            The chunk sizes to be used by neuroglancer to load parts of the 
+            volume. Multiple arrays can be given to use different chunk sizes in 
+            the different viewports. If only one chunk size is given, it will be 
+            used by all viewports (and chunks are shared between viewports).
         name: string, optional
             A human readable name for the volume. Will be shown as the layer name in the viewer.
         shader: string, optional
             A GLSL shader used to render the volume. See 
             https://github.com/google/neuroglancer/blob/master/src/neuroglancer/sliceview/image_layer_rendering.md 
             for details.
+        visible: bool, optional
+            Set the initial visibility of this volume.
         """
 
-        key = ndstore.create_key()
-
-        if chunk_size is None:
+        if chunk_data_sizes is None:
 
             # guess a chunk size, such that the max size of the chunk is
             # 2**21 = 2**(3*7)
@@ -81,43 +75,39 @@ class Viewer:
             # the resolution
 
             # voxels per world unit
-            vpu = [ 1.0/r for r in resolution ]
+            vpu = [ 1.0/r for r in voxel_size ]
             sum_vpu = sum(vpu)
             b0 = int((float(vpu[0])/sum_vpu)*21)
             b1 = int((float(vpu[1])/sum_vpu)*21)
             b2 = int((float(vpu[2])/sum_vpu)*21)
-            chunk_size = [ 2**b0, 2**b1, 2**b2 ]
+            chunk_data_sizes = [ [ 2**b0, 2**b1, 2**b2 ] ]
 
-        if name is None:
-            name = key
-
-        volume = Volume(array, resolution, offset, vtype, chunk_size, name, shader)
-        self.volumes.append((key, volume))
-
-        global volumes
-        volumes[key] = volume
+        self.add(array, name=name, voxel_size=voxel_size, offset=offset, volume_type=volume_type, shader=shader, visible=visible, chunk_data_sizes=chunk_data_sizes)
 
     def show(self):
+        """Show the viewer.
+        """
 
-        layers = collections.OrderedDict()
-        for (key, volume) in self.volumes:
-
-            layers[volume.name] = {
-                'type': 'image' if volume.vtype is 'raw' else 'segmentation',
-                'source': 'ndstore://http://' + self.hostname + '/' + self.kernel_esc_path + key
-            }
-
-            if volume.shader is not None:
-                layers[volume.name]['shader'] = volume.shader
-
-        arguments = { 'layers': layers }
-        arguments_json = json.dumps(arguments)
-        viewer_url = "http://" + self.hostname + '/viewer#!' + urllib.quote(arguments_json, safe='~@#$&()*!+=:;,.?/\'')
-
+        viewer_url = self.get_server_url() + '/neuroglancer' + '#!' + self.get_encoded_state()
         large_html = "<style>.container { width:100% !important; }</style>" if self.large else ""
+
         return HTML(large_html + "<iframe src=\"" + viewer_url + "\" width=\"100%\" height=\"1024px\"><\iframe>")
 
-    def setup_ndstore_url(self):
+    def register_volume(self, volume):
 
-        connection_file = find_connection_file()
-        self.kernel_esc_path = url_escape(connection_file)
+        # globally register volume
+        global volumes
+        volumes[volume.token] = volume
+
+        # globally register kernel client for this volume in the Jupyter server
+        cf = url_escape(find_connection_file())
+        http_client= HTTPClient()
+        try:
+            response = http_client.fetch(self.get_server_url() + '/register_token/' + volume.token + '/' + cf)
+        except Exception as e:
+            raise RuntimeError("could not register token: " + str(e))
+        http_client.close()
+
+    def get_server_url(self):
+
+        return 'http://' + self.hostname
