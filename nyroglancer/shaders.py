@@ -22,3 +22,6 @@ def green():
 
 def blue():
     return __main("emitRGB(vec3(0, 0, toNormalized(getDataValue())))")
+
+def rgb():
+    return __main("emitRGB(vec3(toNormalized(getDataValue(0)),toNormalized(getDataValue(1)),toNormalized(getDataValue(2))))")
