@@ -1,5 +1,4 @@
 jupyter
 numpy
 Pillow
-git+http://github.com/funkey/neuroglancer@ndstore_cube_dimension#egg=neuroglancer
-neuroglancer
+neuroglancer>=0.0.6
