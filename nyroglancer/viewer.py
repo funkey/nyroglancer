@@ -35,7 +35,7 @@ class Viewer(neuroglancer.BaseViewer):
         """
         self.hostname = hostname
 
-    def put(self, array, voxel_size = [1.0, 1.0, 1.0], offset = [0, 0, 0], volume_type = None, chunk_data_sizes = None, name = None, shader = None, visible = True):
+    def put(self, array, voxel_size = [1.0, 1.0, 1.0], offset = [0, 0, 0], volume_type = None, max_voxels_per_chunk_log2 = None, name = None, shader = None, visible = True):
         """
         Prepare a numpy array for visualization.
 
@@ -49,7 +49,7 @@ class Viewer(neuroglancer.BaseViewer):
             The offset of the volume in world units.
         volume_type: string, optional
             "image" or "segmentation". If not set, it will be guessed based on the data type of `array`.
-        chunk_data_sizes: [ [float] ], optional
+        max_voxels_per_chunk_log2: int, optional
             The chunk sizes to be used by neuroglancer to load parts of the 
             volume. Multiple arrays can be given to use different chunk sizes in 
             the different viewports. If only one chunk size is given, it will be 
@@ -64,25 +64,7 @@ class Viewer(neuroglancer.BaseViewer):
             Set the initial visibility of this volume.
         """
 
-        if chunk_data_sizes is None:
-
-            # guess a chunk size, such that the max size of the chunk is
-            # 2**21 = 2**(3*7)
-            #
-            # in isotropic volumes, this is [2**7, 2**7, 2**7]
-            #
-            # in unisotropic volumes, we redistribute the exponent according to 
-            # the resolution
-
-            # voxels per world unit
-            vpu = [ 1.0/r for r in voxel_size ]
-            sum_vpu = sum(vpu)
-            b0 = int((float(vpu[0])/sum_vpu)*21)
-            b1 = int((float(vpu[1])/sum_vpu)*21)
-            b2 = int((float(vpu[2])/sum_vpu)*21)
-            chunk_data_sizes = [ [ 2**b0, 2**b1, 2**b2 ] ]
-
-        self.add(array, name=name, voxel_size=voxel_size, offset=offset, volume_type=volume_type, shader=shader, visible=visible, chunk_data_sizes=chunk_data_sizes)
+        self.add(array, name=name, voxel_size=voxel_size, offset=offset, volume_type=volume_type, shader=shader, visible=visible, max_voxels_per_chunk_log2=max_voxels_per_chunk_log2)
 
     def show(self):
         """Show the viewer.

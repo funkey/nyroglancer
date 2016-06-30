@@ -41,7 +41,7 @@ def load_jupyter_server_extension(nb_server_app):
     host_pattern = '.*$'
 
     web_app.add_handlers(host_pattern, [('/neuroglancer/info/([^/]+)', ndstore.Info)])
-    web_app.add_handlers(host_pattern, [('/neuroglancer/([^/]+)/([^/]+)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)', ndstore.Data)])
+    web_app.add_handlers(host_pattern, [('/neuroglancer/([^/]+)/([^/]+)/([^/]+)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)/([0-9]*),([0-9]*)', ndstore.Data)])
     web_app.add_handlers(host_pattern, [('/neuroglancer', Viewer)])
     web_app.add_handlers(host_pattern, [('/register_token/([^/]+)/([^/]+)', ndstore.RegisterToken)])
     web_app.add_handlers(host_pattern, [('/js/neuroglancer/main.bundle.js', MainBundle)])
