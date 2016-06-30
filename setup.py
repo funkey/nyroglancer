@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='nyroglancer',
-    version='1.0.0',
+    version='1.0.1',
     description='jupyter extension for neuroglancer',
     author='Jan Funke',
     author_email='jfunke@iri.upc.edu',
