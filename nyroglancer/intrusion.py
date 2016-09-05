@@ -52,7 +52,11 @@ def evaluate(kernel_client, expression):
     result = reply['content']['user_expressions']['e']
 
     if isinstance(result, dict) and 'status' in result and result['status'] == 'error':
-        raise RuntimeError(result['evalue'] + "\n\n" + "\n\t".join(result['traceback']))
+        raise RuntimeError(
+                "Error when executing " + expression + " in kernel client " +
+                    str(kernel_client) + "\n" +
+                result['evalue'] + "\n\n" +
+                "\n\t".join(result['traceback']))
 
     data = result['data'].values()[0].strip().strip('\'').decode('string-escape')
 
