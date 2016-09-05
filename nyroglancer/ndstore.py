@@ -8,7 +8,6 @@ token_clients = {}
 
 def register_kernel_client(token, client):
 
-    global token_clients
     token_clients[token] = client
 
 def get_kernel_client(token):
