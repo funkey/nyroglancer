@@ -13,7 +13,7 @@ setup(
     packages = find_packages(),
     install_requires = [
         "jupyter",
-        "neuroglancer>=0.0.6",
+        "neuroglancer>=0.0.8",
     ],
     use_2to3 = True,
 )
