@@ -40,7 +40,7 @@ raw = h5py.File("test.hdf")['volumes/raw']
 seg = h5py.File("test.hdf")['volumes/labels/neuron_ids']
 
 big_viewer = nyroglancer.Viewer()
-big_viewer.put(raw, resolution=[40,4,4], vtype="raw", name="raw")
-big_viewer.put(seg, resolution=[40,4,4], vtype="segmentation", name="neuron IDs")
+big_viewer.add(raw, volume_type="image", voxel_size = [4.0, 4.0, 40.0], name="raw")
+big_viewer.add(seg, volume_type="segmentation", voxel_size = [4.0, 4.0, 40.0], name="neuron IDs")
 big_viewer.show()
 ```
