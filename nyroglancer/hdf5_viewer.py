@@ -5,12 +5,19 @@ import h5py
 
 class Hdf5Viewer(Viewer):
 
-    def __init__(self, filename):
+    def __init__(self, filename = None):
 
         super(Hdf5Viewer, self).__init__()
-        self.file = h5py.File(filename, 'r')
+        self.files = []
 
-        self.__traverse_add(self.file)
+        if filename is not None:
+            self.add_file(filename)
+
+    def add_file(self, filename):
+
+        f = h5py.File(filename, 'r')
+        self.files.append(f)
+        self.__traverse_add(f)
 
     def add_dataset(self, dataset, name):
 
@@ -29,8 +36,6 @@ class Hdf5Viewer(Viewer):
         self.add(dataset, name=name, **kwargs)
 
     def __traverse_add(self, item):
-
-        print("entering " + item.name)
 
         if isinstance(item, h5py.Dataset):
             self.add_dataset(item, item.name)
