@@ -39,7 +39,7 @@ class Viewer(neuroglancer.BaseViewer):
         """Show the viewer.
         """
 
-        viewer_url = self.get_server_url() + '/neuroglancer' + '#!' + self.get_encoded_state()
+        viewer_url = self.get_server_url() + ('/neuroglancer' + '#!').encode('utf8') + self.get_encoded_state()
         large_html = "<style>.container { width:100% !important; }</style>" if self.large else ""
 
         return HTML(large_html + "<iframe src=\"" + viewer_url + "\" width=\"100%\" height=\"1024px\"><\iframe>")

@@ -22,17 +22,17 @@ class Viewer(IPythonHandler):
 
 class MainBundle(IPythonHandler):
     def get(self):
-        self.write(main_js.replace("chunk_worker.bundle.js", "js/neuroglancer/chunk_worker.bundle.js"))
+        self.write(main_js.replace("chunk_worker.bundle.js", "js/neuroglancer/chunk_worker.bundle.js").encode('utf8'))
         self.set_header("Content-Type", "application/javascript")
 
 class ChunkWorkerBundle(IPythonHandler):
     def get(self):
-        self.write(chunk_worker_js)
+        self.write(chunk_worker_js.encode('utf8'))
         self.set_header("Content-Type", "application/javascript")
 
 class StylesCss(IPythonHandler):
     def get(self):
-        self.write(styles_css)
+        self.write(styles_css.encode('utf8'))
         self.set_header("Content-Type", "text/css")
 
 def load_jupyter_server_extension(nb_server_app):
