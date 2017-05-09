@@ -1,5 +1,6 @@
 from __future__ import print_function
 from viewer import Viewer
+from shaders import rgb
 import h5py
 
 class Hdf5Viewer(Viewer):
@@ -13,19 +14,19 @@ class Hdf5Viewer(Viewer):
 
     def add_dataset(self, dataset, name):
 
-        offset = [0,0,0]
-        voxel_size = [1,1,1]
+        print("Adding dataset", name)
 
+        kwargs = {}
         if 'offset' in dataset.attrs:
-            offset = dataset.attrs['offset'][::-1]
+            kwargs['offset'] = dataset.attrs['offset'][::-1]
         if 'resolution' in dataset.attrs:
-            voxel_size = dataset.attrs['resolution'][::-1]
+            kwargs['voxel_size'] = dataset.attrs['resolution'][::-1]
         elif 'voxel_size' in dataset.attrs:
-            voxel_size = dataset.attrs['voxel_size'][::-1]
+            kwargs['voxel_size'] = dataset.attrs['voxel_size'][::-1]
+        if len(dataset.shape) == 4 and dataset.shape[0] == 3:
+            kwargs['shader'] = rgb()
 
-        print("Adding dataset", name, "with resolution", voxel_size, "at", offset)
-
-        self.add(dataset, offset=offset, voxel_size=voxel_size, name=name)
+        self.add(dataset, name=name, **kwargs)
 
     def __traverse_add(self, item):
 
