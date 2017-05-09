@@ -33,14 +33,13 @@ In your notebook, create a `nyroglancer.Viewer` and populate it with the numpy a
 
 ```python
 import nyroglancer
-import numpy as np
 import h5py
 
 raw = h5py.File("test.hdf")['volumes/raw']
 seg = h5py.File("test.hdf")['volumes/labels/neuron_ids']
 
-big_viewer = nyroglancer.Viewer()
-big_viewer.put(raw, resolution=[40,4,4], vtype="raw", name="raw")
-big_viewer.put(seg, resolution=[40,4,4], vtype="segmentation", name="neuron IDs")
-big_viewer.show()
+viewer = nyroglancer.Viewer()
+viewer.add(raw, resolution=[40,4,4], name="raw")
+viewer.add(seg, resolution=[40,4,4], name="neuron IDs")
+viewer.show()
 ```
