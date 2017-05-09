@@ -35,37 +35,6 @@ class Viewer(neuroglancer.BaseViewer):
         """
         self.hostname = hostname
 
-    def put(self, array, voxel_size = [1.0, 1.0, 1.0], offset = [0, 0, 0], volume_type = None, max_voxels_per_chunk_log2 = None, name = None, shader = None, visible = True):
-        """
-        Prepare a numpy array for visualization.
-
-        Parameters
-        ----------
-        array: numpy.array
-            The data to show.
-        voxel_size: [float], optional
-            The resolution of the data.
-        offset: [float], optional
-            The offset of the volume in world units.
-        volume_type: string, optional
-            "image" or "segmentation". If not set, it will be guessed based on the data type of `array`.
-        max_voxels_per_chunk_log2: int, optional
-            The chunk sizes to be used by neuroglancer to load parts of the 
-            volume. Multiple arrays can be given to use different chunk sizes in 
-            the different viewports. If only one chunk size is given, it will be 
-            used by all viewports (and chunks are shared between viewports).
-        name: string, optional
-            A human readable name for the volume. Will be shown as the layer name in the viewer.
-        shader: string, optional
-            A GLSL shader used to render the volume. See 
-            https://github.com/google/neuroglancer/blob/master/src/neuroglancer/sliceview/image_layer_rendering.md 
-            for details.
-        visible: bool, optional
-            Set the initial visibility of this volume.
-        """
-
-        self.add(array, name=name, voxel_size=voxel_size, offset=offset, volume_type=volume_type, shader=shader, visible=visible, max_voxels_per_chunk_log2=max_voxels_per_chunk_log2)
-
     def show(self):
         """Show the viewer.
         """
