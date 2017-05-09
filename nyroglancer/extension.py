@@ -22,7 +22,7 @@ class Viewer(IPythonHandler):
 
 class MainBundle(IPythonHandler):
     def get(self):
-        self.write(main_js.replace("chunk_worker.bundle.js".encode('utf8'), "js/neuroglancer/chunk_worker.bundle.js".encode('utf8')).encode('utf8'))
+        self.write(main_js.replace("chunk_worker.bundle.js".encode('utf8'), "js/neuroglancer/chunk_worker.bundle.js".encode('utf8')))
         self.set_header("Content-Type", "application/javascript")
 
 class ChunkWorkerBundle(IPythonHandler):
