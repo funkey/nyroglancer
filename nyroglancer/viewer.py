@@ -54,11 +54,11 @@ class Viewer(neuroglancer.BaseViewer):
         cf = url_escape(find_connection_file())
         http_client= HTTPClient()
         try:
-            response = http_client.fetch(self.get_server_url() + '/register_token/' + volume.token.decode('utf8') + '/' + cf)
+            response = http_client.fetch(self.get_server_url() + '/register_token/'.encode('utf8') + volume.token + '/'.encode('utf8') + cf)
         except Exception as e:
             raise RuntimeError("could not register token: " + str(e))
         http_client.close()
 
     def get_server_url(self):
 
-        return 'http://' + self.hostname
+        return ('http://' + self.hostname).encode('utf8')
