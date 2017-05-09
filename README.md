@@ -23,8 +23,20 @@ Finally, the extension has to be enabled in jupyter. Add to
 `nyroglancer.extension`, e.g.:
 ```python
 c = get_config()
-c.NotebookApp.nbserver_extensions = { 'nyroglancer.extension': True }
+c.NotebookApp.server_extensions = ['nyroglancer.extension']
 ```
+
+or if `~/.jupyter/jupyter_notebook_cofig.json` exists, you can add `nyroglancer.extension` to the
+`server_extensions` field.
+
+These config options work as of 5/9/17 with the following package versions:
+
+  - Jupyer: 4.3.0
+  - IPython: 5.1.0
+  - nbformat: 4.3.0
+
+Try updating nbformat if you have problems - if that fails you may want to check out the docs on the Jupyter config system,
+as it seems to change frequently.
 
 Usage
 =====
