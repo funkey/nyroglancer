@@ -3,9 +3,9 @@ from jupyter_client import find_connection_file
 from tornado.escape import url_escape
 from tornado.httpclient import HTTPClient
 import collections
-import intrusion
+import nyroglancer.intrusion
 import json
-import ndstore
+import nyroglancer.ndstore
 import neuroglancer
 import urllib
 
