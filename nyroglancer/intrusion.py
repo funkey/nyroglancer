@@ -1,4 +1,5 @@
 from jupyter_client import BlockingKernelClient
+import sys
 
 clients = {}
 
@@ -58,7 +59,12 @@ def evaluate(kernel_client, expression):
                 result['evalue'] + "\n\n" +
                 "\n\t".join(result['traceback']))
 
-    data = result['data'].values()[0].strip().strip('\'').decode('string-escape')
+    raw_data = result['data'].values()[0].strip().strip('\'')
+    # python3
+    if sys.version_info[0] == 3:
+        data = bytes(raw_data, 'utf8').decode('unicode_escape')
+    else:
+        data = raw_data.decode('string_escape')
 
     #print "[nyroglancer] return data part (between >>> and <<<):\n\t>>>" + str(data) + "<<<\n"
 
