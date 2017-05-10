@@ -17,7 +17,7 @@ class Hdf5Viewer(Viewer):
 
         f = h5py.File(filename, 'r')
         self.files.append(f)
-        self.__traverse_add(f)
+        self.__traverse_add(f, filename)
 
     def add_dataset(self, dataset, name):
 
@@ -35,12 +35,12 @@ class Hdf5Viewer(Viewer):
 
         self.add(dataset, name=name, **kwargs)
 
-    def __traverse_add(self, item):
+    def __traverse_add(self, item, filename):
 
         if isinstance(item, h5py.Dataset):
-            self.add_dataset(item, item.name)
+            self.add_dataset(item, filename + item.name)
         elif isinstance(item, h5py.Group):
             for k in item:
-                self.__traverse_add(item[k])
+                self.__traverse_add(item[k], filename)
         else:
             print("Skipping " + item.name)
