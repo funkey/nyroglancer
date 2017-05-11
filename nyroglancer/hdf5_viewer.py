@@ -25,11 +25,11 @@ class Hdf5Viewer(Viewer):
 
         kwargs = {}
         if 'offset' in dataset.attrs:
-            kwargs['offset'] = dataset.attrs['offset'][::-1]
+            kwargs['offset'] = tuple(dataset.attrs['offset'][::-1])
         if 'resolution' in dataset.attrs:
-            kwargs['voxel_size'] = dataset.attrs['resolution'][::-1]
+            kwargs['voxel_size'] = tuple(dataset.attrs['resolution'][::-1])
         elif 'voxel_size' in dataset.attrs:
-            kwargs['voxel_size'] = dataset.attrs['voxel_size'][::-1]
+            kwargs['voxel_size'] = tuple(dataset.attrs['voxel_size'][::-1])
         if len(dataset.shape) == 4 and dataset.shape[0] == 3:
             kwargs['shader'] = rgb()
 
