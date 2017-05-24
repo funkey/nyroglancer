@@ -2,6 +2,7 @@ from __future__ import print_function
 from viewer import Viewer
 from shaders import rgb
 import h5py
+import numpy as np
 
 class Hdf5Viewer(Viewer):
 
@@ -32,6 +33,9 @@ class Hdf5Viewer(Viewer):
             kwargs['voxel_size'] = tuple(dataset.attrs['voxel_size'][::-1])
         if len(dataset.shape) == 4 and dataset.shape[0] == 3:
             kwargs['shader'] = rgb()
+
+        if dataset.dtype == np.bool:
+            dataset = np.array(dataset, dtype=np.uint8)*255
 
         self.add(dataset, name=name, **kwargs)
 
