@@ -3,9 +3,9 @@ from jupyter_client import find_connection_file
 from tornado.escape import url_escape
 from tornado.httpclient import HTTPClient
 import collections
-import intrusion
+import nyroglancer.intrusion
 import json
-import ndstore
+import nyroglancer.ndstore
 import neuroglancer
 import urllib
 
@@ -54,7 +54,7 @@ class Viewer(neuroglancer.BaseViewer):
         cf = url_escape(find_connection_file())
         http_client= HTTPClient()
         try:
-            response = http_client.fetch(self.get_server_url() + '/register_token/' + volume.token.decode('utf8') + '/' + cf)
+            response = http_client.fetch(self.get_server_url() + '/register_token/' + volume.token.decode('utf8') + '/'+ cf)
         except Exception as e:
             raise RuntimeError("could not register token: " + str(e))
         http_client.close()
