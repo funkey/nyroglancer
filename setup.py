@@ -14,6 +14,7 @@ setup(
     install_requires = [
         "jupyter",
         "neuroglancer>=0.0.8",
+        "h5py",
     ],
     use_2to3 = True,
 )
