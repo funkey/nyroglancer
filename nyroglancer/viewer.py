@@ -7,7 +7,6 @@ import intrusion
 import json
 import ndstore
 import neuroglancer
-import urllib
 
 # volumes of all viewer instances
 volumes = {}
