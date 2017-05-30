@@ -22,6 +22,10 @@ class Hdf5Viewer(Viewer):
 
     def add_dataset(self, dataset, name):
 
+        if len(dataset.shape) not in [3,4]:
+            print("Skipping " + name)
+            return
+
         print("Adding dataset", name)
 
         kwargs = {}
