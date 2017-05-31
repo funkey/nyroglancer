@@ -1,54 +1,79 @@
 from __future__ import print_function
-from viewer import Viewer
-from shaders import rgb
+
+import os
+
 import h5py
 import numpy as np
 
+from viewer import Viewer
+from shaders import rgb
+
+
 class Hdf5Viewer(Viewer):
 
-    def __init__(self, filename = None):
+    def __init__(self, filepath=None):
 
         super(Hdf5Viewer, self).__init__()
         self.files = []
 
-        if filename is not None:
-            self.add_file(filename)
+        if filepath is not None:
+            self.add_file(filepath)
 
-    def add_file(self, filename):
+    def add_file(self, filepath):
 
-        f = h5py.File(filename, 'r')
+        f = h5py.File(filepath, 'r')
         self.files.append(f)
-        self.__traverse_add(f, filename)
+        self.__traverse_add(f)
 
     def add_dataset(self, dataset, name):
 
-        if len(dataset.shape) not in [3,4]:
-            print("Skipping " + name)
+        if dataset.ndim < 3:
+            print("Skipping dataset", name, "with shape", dataset.shape)
             return
+        elif dataset.ndim > 4:
+            try:
+                print("Reshaping dataset", name, "with shape", dataset.shape, "to be 4-dimensional")
+                data = dataset[:]
+                data = data.reshape(data.shape[-4:])
+            except Exception as e:
+                print(e)
+                raise Exception("Dataset had too many dimensions, but reshaping to", new_shape, "didn't work :(")
+        else:
+            data = dataset
 
-        print("Adding dataset", name)
+        print("Adding layer", name)
 
         kwargs = {}
         if 'offset' in dataset.attrs:
-            kwargs['offset'] = tuple(dataset.attrs['offset'][::-1])
+            offset_voxels = tuple(dataset.attrs['offset'][::-1])
+        else:
+            offset_voxels = (0, 0, 0)
         if 'resolution' in dataset.attrs:
-            kwargs['voxel_size'] = tuple(dataset.attrs['resolution'][::-1])
+            resolution = tuple(dataset.attrs['resolution'][::-1])
         elif 'voxel_size' in dataset.attrs:
-            kwargs['voxel_size'] = tuple(dataset.attrs['voxel_size'][::-1])
-        if len(dataset.shape) == 4 and dataset.shape[0] == 3:
+            resolution = tuple(dataset.attrs['voxel_size'][::-1])
+        else:
+            resolution = (1, 1, 1)
+        kwargs['voxel_size'] = resolution
+        offset_nanometers = tuple(ov * r for ov, r in zip(offset_voxels, resolution))
+        kwargs['offset'] = offset_nanometers
+        if data.ndim == 4 and data.shape[0] == 3:
             kwargs['shader'] = rgb()
 
-        if dataset.dtype == np.bool:
-            dataset = np.array(dataset, dtype=np.uint8)*255
+        if data.dtype == np.bool:
+            data = np.array(data, dtype=np.uint8) * 255
 
-        self.add(dataset, name=name, **kwargs)
+        self.add(data, name=name, **kwargs)
 
-    def __traverse_add(self, item, filename):
+    def __traverse_add(self, item):
 
         if isinstance(item, h5py.Dataset):
-            self.add_dataset(item, filename + item.name)
+            filename = os.path.basename(item.file.filename)
+            dataset_name = item.name.lstrip(os.path.sep)
+            layer_name = os.path.join(filename, dataset_name)
+            self.add_dataset(item, layer_name)
         elif isinstance(item, h5py.Group):
             for k in item:
-                self.__traverse_add(item[k], filename)
+                self.__traverse_add(item[k])
         else:
-            print("Skipping " + item.name)
+            print("Skipping item", item)
