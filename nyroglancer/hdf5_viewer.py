@@ -27,11 +27,21 @@ class Hdf5Viewer(Viewer):
 
     def add_dataset(self, dataset, name):
 
-        if dataset.ndim not in [3, 4]:
+        if dataset.ndim < 3:
             print("Skipping dataset", name, "with shape", dataset.shape)
             return
+        elif dataset.ndim > 4:
+            try:
+                print("Reshaping dataset", name, "with shape", dataset.shape, "to be 4-dimensional")
+                data = dataset[:]
+                data = data.reshape(data.shape[-4:])
+            except Exception as e:
+                print(e)
+                raise Exception("Dataset had too many dimensions, but reshaping to", new_shape, "didn't work :(")
+        else:
+            data = dataset
 
-        print("Adding dataset", name)
+        print("Adding layer", name)
 
         kwargs = {}
         if 'offset' in dataset.attrs:
@@ -47,13 +57,13 @@ class Hdf5Viewer(Viewer):
         kwargs['voxel_size'] = resolution
         offset_nanometers = tuple(ov * r for ov, r in zip(offset_voxels, resolution))
         kwargs['offset'] = offset_nanometers
-        if dataset.ndim == 4 and dataset.shape[0] == 3:
+        if data.ndim == 4 and data.shape[0] == 3:
             kwargs['shader'] = rgb()
 
-        if dataset.dtype == np.bool:
-            dataset = np.array(dataset, dtype=np.uint8)*255
+        if data.dtype == np.bool:
+            data = np.array(data, dtype=np.uint8) * 255
 
-        self.add(dataset, name=name, **kwargs)
+        self.add(data, name=name, **kwargs)
 
     def __traverse_add(self, item):
 
