@@ -1,29 +1,34 @@
 from __future__ import print_function
-from viewer import Viewer
-from shaders import rgb
+
+import os
+
 import h5py
 import numpy as np
 
+from viewer import Viewer
+from shaders import rgb
+
+
 class Hdf5Viewer(Viewer):
 
-    def __init__(self, filename = None):
+    def __init__(self, filepath=None):
 
         super(Hdf5Viewer, self).__init__()
         self.files = []
 
-        if filename is not None:
-            self.add_file(filename)
+        if filepath is not None:
+            self.add_file(filepath)
 
-    def add_file(self, filename):
+    def add_file(self, filepath):
 
-        f = h5py.File(filename, 'r')
+        f = h5py.File(filepath, 'r')
         self.files.append(f)
-        self.__traverse_add(f, filename)
+        self.__traverse_add(f)
 
     def add_dataset(self, dataset, name):
 
-        if len(dataset.shape) not in [3,4]:
-            print("Skipping " + name)
+        if dataset.ndim not in [3, 4]:
+            print("Skipping dataset", name, "with shape", dataset.shape)
             return
 
         print("Adding dataset", name)
@@ -43,12 +48,15 @@ class Hdf5Viewer(Viewer):
 
         self.add(dataset, name=name, **kwargs)
 
-    def __traverse_add(self, item, filename):
+    def __traverse_add(self, item):
 
         if isinstance(item, h5py.Dataset):
-            self.add_dataset(item, filename + item.name)
+            filename = os.path.basename(item.file.filename)
+            dataset_name = item.name.lstrip(os.path.sep)
+            layer_name = os.path.join(filename, dataset_name)
+            self.add_dataset(item, layer_name)
         elif isinstance(item, h5py.Group):
             for k in item:
-                self.__traverse_add(item[k], filename)
+                self.__traverse_add(item[k])
         else:
-            print("Skipping " + item.name)
+            print("Skipping item", item)
