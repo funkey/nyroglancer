@@ -22,12 +22,6 @@ class Hdf5Viewer(Viewer):
 
     def add_dataset(self, dataset, name):
 
-        if len(dataset.shape) not in [3,4]:
-            print("Skipping " + name)
-            return
-
-        print("Adding dataset", name)
-
         kwargs = {}
         if 'offset' in dataset.attrs:
             kwargs['offset'] = tuple(dataset.attrs['offset'][::-1])
@@ -35,6 +29,17 @@ class Hdf5Viewer(Viewer):
             kwargs['voxel_size'] = tuple(dataset.attrs['resolution'][::-1])
         elif 'voxel_size' in dataset.attrs:
             kwargs['voxel_size'] = tuple(dataset.attrs['voxel_size'][::-1])
+
+        # strip 1-dimensions
+        while dataset.shape[0] == 1:
+            dataset = dataset[0]
+
+        if len(dataset.shape) not in [3,4]:
+            print("Skipping " + name)
+            return
+
+        print("Adding dataset", name)
+
         if len(dataset.shape) == 4 and dataset.shape[0] == 3:
             kwargs['shader'] = rgb()
 
