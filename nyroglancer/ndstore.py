@@ -4,18 +4,18 @@ from tornado.escape import url_unescape
 from tornado.web import HTTPError
 import binascii
 
-token_clients = {}
+connection_files = {}
 
-def register_kernel_client(token, client):
+def register_connection_file(token, connection_file):
 
-    token_clients[token] = client
+    connection_files[token] = connection_file
 
 def get_kernel_client(token):
 
-    if token not in token_clients:
+    if token not in connection_files:
         return None
 
-    return token_clients[token]
+    return connect(connection_files[token])
 
 class Info(IPythonHandler):
 
@@ -68,4 +68,4 @@ class RegisterToken(IPythonHandler):
 
     def get(self, token, connection_file):
 
-        register_kernel_client(token, connect(url_unescape(connection_file)))
+        register_connection_file(token, url_unescape(connection_file))
