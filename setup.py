@@ -2,6 +2,8 @@
 
 from setuptools import setup, find_packages
 
+static_files = ['main.bundle.js', 'chunk_worker.bundle.js', 'styles.css', 'index.html']
+
 setup(
     name='nyroglancer',
     version='1.0.2',
@@ -11,6 +13,9 @@ setup(
     url='https://github.com/funkey/nyroglancer',
     license = 'Apache License 2.0',
     packages = find_packages(),
+    package_data={
+        'neuroglancer.static': static_files,
+    },
     install_requires = [
         "jupyter",
         "neuroglancer>=0.0.8",

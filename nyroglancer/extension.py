@@ -1,5 +1,5 @@
 from notebook.base.handlers import IPythonHandler
-from neuroglancer.static import *
+from nyroglancer.static import *
 import ndstore
 
 class Viewer(IPythonHandler):
