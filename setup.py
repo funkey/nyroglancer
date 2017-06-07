@@ -14,7 +14,7 @@ setup(
     license = 'Apache License 2.0',
     packages = find_packages(),
     package_data={
-        'neuroglancer.static': static_files,
+        'nyroglancer.static': static_files,
     },
     install_requires = [
         "jupyter",
