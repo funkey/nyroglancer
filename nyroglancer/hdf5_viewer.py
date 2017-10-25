@@ -31,7 +31,7 @@ class Hdf5Viewer(Viewer):
             kwargs['voxel_size'] = tuple(dataset.attrs['voxel_size'][::-1])
 
         # strip 1-dimensions
-        while dataset.shape[0] == 1:
+        while len(dataset.shape) > 3 and dataset.shape[0] == 1:
             dataset = dataset[0]
 
         if len(dataset.shape) not in [3,4]:
