@@ -6,10 +6,12 @@ import numpy as np
 
 class Hdf5Viewer(Viewer):
 
-    def __init__(self, filename = None):
+    def __init__(self, filename = None, show_layer_numbers=False):
 
         super(Hdf5Viewer, self).__init__()
         self.files = []
+        self.num_datasets = 0
+        self.show_layer_numbers = show_layer_numbers
 
         if filename is not None:
             self.add_file(filename)
@@ -38,13 +40,17 @@ class Hdf5Viewer(Viewer):
             print("Skipping " + name)
             return
 
-        print("Adding dataset", name)
+        self.num_datasets += 1
+        print("Adding dataset", name, "as", self.num_datasets)
 
         if len(dataset.shape) == 4 and dataset.shape[0] == 3:
             kwargs['shader'] = rgb()
 
         if dataset.dtype == np.bool:
             dataset = np.array(dataset, dtype=np.uint8)*255
+
+        if self.show_layer_numbers:
+            name = str(self.num_datasets)
 
         self.add(dataset, name=name, **kwargs)
 
