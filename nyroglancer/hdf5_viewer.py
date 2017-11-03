@@ -52,19 +52,30 @@ class Hdf5Viewer(Viewer):
             print("Skipping " + name)
             return
 
-        self.num_datasets += 1
-        print("Adding dataset", name, "as", self.num_datasets)
+        num_channels = 1
+        if len(dataset.shape) > 3:
+            num_channels = dataset.shape[0]
 
-        if len(dataset.shape) == 4 and dataset.shape[0] == 3:
-            kwargs['shader'] = rgb()
+        for i in range(0, num_channels, 3):
 
-        if dataset.dtype == np.bool:
-            dataset = np.array(dataset, dtype=np.uint8)*255
+            if num_channels > 1:
+                view = dataset[i:i+3]
+            else:
+                view = dataset
 
-        if self.show_layer_numbers:
-            name = str(self.num_datasets)
+            self.num_datasets += 1
+            print("Adding dataset", name, "as", self.num_datasets)
 
-        self.add(dataset, name=name, **kwargs)
+            if len(view.shape) == 4 and view.shape[0] == 3:
+                kwargs['shader'] = rgb()
+
+            if view.dtype == np.bool:
+                view = np.array(view, dtype=np.uint8)*255
+
+            if self.show_layer_numbers:
+                self.add(view, name=str(self.num_datasets), **kwargs)
+            else:
+                self.add(view, name=name, **kwargs)
 
     def __traverse_add(self, item, filename):
 
