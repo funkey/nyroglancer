@@ -22,13 +22,12 @@ class Hdf5Viewer(Viewer):
         # make sure this file is closed before opening it again, h5py doesn't
         # handle this well otherwise
         for obj in gc.get_objects():
-            if isinstance(obj, h5py.File) and obj.filename == filename:
+            if isinstance(obj, h5py.File):
                 try:
-                    print("Closing previously open %s"%filename)
-                    obj.close()
-                    print("Closed")
+                    if obj.filename == filename:
+                        print("Closing previously open %s"%filename)
+                        obj.close()
                 except:
-                    print("Could not close")
                     pass
 
         f = h5py.File(filename, 'r')
