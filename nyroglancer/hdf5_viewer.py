@@ -3,6 +3,7 @@ from viewer import Viewer
 from shaders import rgb
 import h5py
 import numpy as np
+import gc
 
 class Hdf5Viewer(Viewer):
 
@@ -17,6 +18,18 @@ class Hdf5Viewer(Viewer):
             self.add_file(filename)
 
     def add_file(self, filename):
+
+        # make sure this file is closed before opening it again, h5py doesn't
+        # handle this well otherwise
+        for obj in gc.get_objects():
+            if isinstance(obj, h5py.File) and obj.filename == filename:
+                try:
+                    print("Closing previously open %s"%filename)
+                    obj.close()
+                    print("Closed")
+                except:
+                    print("Could not close")
+                    pass
 
         f = h5py.File(filename, 'r')
         self.files.append(f)
