@@ -55,3 +55,21 @@ viewer.add(raw, resolution=[40,4,4], name="raw")
 viewer.add(seg, resolution=[40,4,4], name="neuron IDs")
 viewer.show()
 ```
+
+Publishing to PyPI
+==================
+
+Create `~/.pypirc` with the following content:
+```
+[distutils]
+index-servers=pypi
+
+[pypi]
+username=neuroglancer
+password=xxxx
+```
+
+Run:
+```shell
+python setup.py sdist upload -r pypi
+```
