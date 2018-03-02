@@ -17,7 +17,7 @@ class Hdf5Viewer(Viewer):
         if filename is not None:
             self.add_file(filename)
 
-    def add_file(self, filename):
+    def add_file(self, filename, datasets=None):
 
         # make sure this file is closed before opening it again, h5py doesn't
         # handle this well otherwise
@@ -32,7 +32,12 @@ class Hdf5Viewer(Viewer):
 
         f = h5py.File(filename, 'r')
         self.files.append(f)
-        self.__traverse_add(f, filename)
+
+        if datasets is None:
+            self.__traverse_add(f, filename)
+        else:
+            for dataset in datasets:
+                self.add_dataset(f[dataset], filename + dataset)
 
     def add_dataset(self, dataset, name):
 
