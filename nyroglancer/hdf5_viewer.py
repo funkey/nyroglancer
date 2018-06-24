@@ -52,8 +52,10 @@ class Hdf5Viewer(Viewer):
         # strip 1-dimensions
         while len(dataset.shape) > 3 and dataset.shape[0] == 1:
             dataset = dataset[0]
-            kwargs['offset'] = kwargs['offset'][:-1]
-            kwargs['voxel_size'] = kwargs['voxel_size'][:-1]
+            if 'offset' in kwargs:
+                kwargs['offset'] = kwargs['offset'][:-1]
+            if 'voxel_size' in kwargs:
+                kwargs['voxel_size'] = kwargs['voxel_size'][:-1]
 
         if len(dataset.shape) not in [3,4]:
             print("Skipping " + name)
@@ -67,8 +69,10 @@ class Hdf5Viewer(Viewer):
 
             if num_channels > 1:
                 view = dataset[i:i+3]
-                kwargs['offset'] = kwargs['offset'][:len(view.shape)-1]
-                kwargs['voxel_size'] = kwargs['voxel_size'][:len(view.shape)-1]
+                if 'offset' in kwargs:
+                    kwargs['offset'] = kwargs['offset'][:len(view.shape)-1]
+                if 'voxel_size' in kwargs:
+                    kwargs['voxel_size'] = kwargs['voxel_size'][:len(view.shape)-1]
             else:
                 view = dataset
 
