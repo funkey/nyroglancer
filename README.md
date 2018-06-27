@@ -31,7 +31,7 @@ or if `~/.jupyter/jupyter_notebook_cofig.json` exists, you can add `nyroglancer.
 
 These config options work as of 5/9/17 with the following package versions:
 
-  - Jupyer: 4.3.0
+  - jupyter_core: 4.3.0
   - IPython: 5.1.0
   - nbformat: 4.3.0
 
