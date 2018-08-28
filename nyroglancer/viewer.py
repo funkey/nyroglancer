@@ -3,6 +3,7 @@ from jupyter_client import find_connection_file
 from tornado.escape import url_escape
 from tornado.httpclient import HTTPClient
 import collections
+import daisy
 import intrusion
 import json
 import ndstore
@@ -19,6 +20,21 @@ class Viewer(neuroglancer.BaseViewer):
         self.hostname = 'localhost:8888'
         self.large = False
         super(Viewer, self).__init__()
+
+    def add(self, array, *args, **kwargs):
+
+        if isinstance(array, daisy.Array):
+
+            self.add(
+                array.data,
+                voxel_size=array.voxel_size[::-1],
+                offset=array.roi.get_begin()[::-1],
+                *args,
+                **kwargs)
+
+        else:
+
+            super(Viewer, self).add(array, *args, **kwargs)
 
     def set_large(self, large = True):
         """Let the viewer span the whole width of the browser window.
